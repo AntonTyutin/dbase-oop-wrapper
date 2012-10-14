@@ -54,26 +54,26 @@ class Table
     /**
      * Retrieve record (as is) at given position
      * @param integer $position Record position
-     * @return mixed Associative array of fields and values
+     * @return mixed Associative array of fields and values or null if $position out of range
      */
     public function getRecordRaw($position)
     {
-        return @dbase_get_record_with_names($this->getDbHandler(), $position);
+        $record = @dbase_get_record_with_names($this->getDbHandler(), $position);
+        return $record === false ? null : $record;
     }
 
     /**
      * Retrieve record (trimmed and decoded values) at given position
      * @param integer $position Record position
-     * @return mixed Associative array of fields and values
+     * @return mixed Associative array of fields and values or null if $position out of range
      */
     public function getRecord($position)
     {
         $record = $this->getRecordRaw($position);
-        if ($record === false) {
-            return null;
+        if ($record !== null) {
+            $encoding = $this->encoding;
+            array_walk($record, function (&$item) use ($encoding) { $item = iconv($encoding, 'utf-8', trim($item)); });
         }
-        $encoding = $this->encoding;
-        array_walk($record, function (&$item) use ($encoding) { $item = iconv($encoding, 'utf-8', trim($item)); });
         return $record;
     }
 
