@@ -1,0 +1,19 @@
+{
+    "name": "minity/dbase-oop-wrapper",
+    "type": "library",
+    "description": "Simple wrapper over php dbase extension",
+    "keywords": ["dbase", "database", "wrapper", "queryobject"],
+    "license": "Apache 2.0",
+    "authors": [
+        {
+            "name": "Anton Tyutin",
+            "email": "anton@tyutin.ru"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.2"
+    },
+    "autoload": {
+        "psr-0": { "Minity\\DBase": "lib/" }
+    }
+}
