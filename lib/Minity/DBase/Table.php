@@ -65,7 +65,7 @@ class Table
     }
 
     /**
-     * Retrieve record (trimmed and decoded values) at given position
+     * Retrieve record (normalized values) at given position
      * @param integer $position Record position
      * @return mixed Associative array of fields and values or null if $position out of range
      */
@@ -73,8 +73,14 @@ class Table
     {
         $record = $this->getRecordRaw($position);
         if ($record !== null) {
-            $encoding = $this->encoding;
-            array_walk($record, function (&$item) use ($encoding) { $item = iconv($encoding, 'utf-8', trim($item)); });
+            foreach ($record as $field => $value) {
+                if ($field === 'deleted') {
+                    $record['deleted'] = (boolean)$value;
+                } else {
+                    $column = $this->getColumn($field);
+                    $record[$field] = $this->formatValue($column['type'], $value);
+                }
+            }
         }
         return $record;
     }
@@ -111,5 +117,23 @@ class Table
     public function getIterator()
     {
         return new RowsIterator($this);
+    }
+
+    private function formatValue($type, $value)
+    {
+        switch ($type) {
+            case 'number':
+                $value = (float)$value;
+                break;
+            case 'date':
+                $value = \DateTime::createFromFormat('Ymdhis', $value . '000000');
+                break;
+            case 'boolean':
+                $value = (boolean)$value;
+                break;
+            default:
+                $value = iconv($this->encoding, 'utf8', trim($value));
+        }
+        return $value;
     }
 }
