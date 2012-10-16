@@ -32,12 +32,14 @@ class TableTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $fields = array(
-            array('a', 'N', 3, 0),
+            array('a', 'N', 3, 1),
             array('b', 'C', 20),
+            array('c', 'L'),
+            array('d', 'D'),
         );
         $rows = array(
-            array(1, iconv('utf8' , 'cp1251', 'Russian текст 1')),
-            array(2, iconv('utf8' , 'cp1251', 'Russian текст 2')),
+            array(1.2, iconv('utf8' , 'cp1251', 'Russian текст 1'), 'T', '20120505'),
+            array(2.4, iconv('utf8' , 'cp1251', 'Russian текст 2'), 'F', '20120105'),
         );
         $this->filename = self::createDatabase($fields, $rows);
         $this->table = new Table($this->filename, Table::MODE_READONLY, 'cp1251');
@@ -60,18 +62,38 @@ class TableTest extends \PHPUnit_Framework_TestCase
 
     public function testGetRecord()
     {
-        $this->assertEquals(array('a' => 1, 'b' => 'Russian текст 1', 'deleted' => 0), $this->table->getRecord(1));
-        $this->assertEquals(array('a' => 2, 'b' => 'Russian текст 2', 'deleted' => 0), $this->table->getRecord(2));
+        $this->assertEquals(
+            array('a' => 1.2, 'b' => 'Russian текст 1', 'c' => true, 'd' => new \DateTime('2012-05-05'), 'deleted' => 0),
+            $this->table->getRecord(1)
+        );
+        $this->assertEquals(
+            array('a' => 2.4, 'b' => 'Russian текст 2', 'c' => false, 'd' => new \DateTime('2012-01-05'), 'deleted' => 0),
+            $this->table->getRecord(2)
+        );
         $this->assertNull($this->table->getRecord(3));
     }
 
     public function testGetHeaders()
     {
-        $this->assertEquals(array('a', 'b', 'deleted'), $this->table->getHeaders());
+        $this->assertEquals(array('a', 'b', 'c', 'd', 'deleted'), $this->table->getHeaders());
     }
 
     public function testGetRecordsCount()
     {
         $this->assertEquals(2, $this->table->getRecordsCount());
+    }
+
+    public function testGetColumns()
+    {
+        $columns = $this->table->getColumns();
+        $this->assertEquals('a', $columns[0]['name']);
+        $this->assertEquals('number', $columns[0]['type']);
+        $this->assertEquals(3, $columns[0]['length']);
+        $this->assertEquals('b', $columns[1]['name']);
+        $this->assertEquals('character', $columns[1]['type']);
+        $this->assertEquals(20, $columns[1]['length']);
+        $this->assertEquals('c', $columns[2]['name']);
+        $this->assertEquals('boolean', $columns[2]['type']);
+        $this->assertEquals(1, $columns[2]['length']);
     }
 }
