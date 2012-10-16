@@ -31,6 +31,8 @@ class Table
 
     private $dbFilename;
 
+    private $columns;
+
     public function __construct($dbFilename, $mode = self::MODE_READONLY, $encoding = 'utf-8')
     {
         $this->dbFilename = $dbFilename;
@@ -80,6 +82,25 @@ class Table
     public function getHeaders()
     {
         return array_keys($this->getRecordRaw(0));
+    }
+
+    public function getColumns()
+    {
+        if (!$this->columns) {
+            $this->columns = array();
+            $columns = @dbase_get_header_info($this->getDbHandler());
+            foreach ($columns as $idx => $col) {
+                $this->columns[$idx] = $col;
+                $this->columns[$col['name']] =& $this->columns[$idx];
+            }
+        }
+        return $this->columns;
+    }
+
+    public function getColumn($idx)
+    {
+        $columns = $this->getColumns();
+        return $columns[$idx];
     }
 
     public function getRecordsCount()
