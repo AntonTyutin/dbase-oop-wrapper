@@ -57,7 +57,27 @@ class TableTest extends \PHPUnit_Framework_TestCase
 
     protected function tearDown()
     {
+        @unlink($this->filename);
+    }
+
+    /**
+     * @expectedException \Minity\DBase\Exception\TableOpenException
+     * @expectedExceptionMessage not found
+     */
+    public function testOpenNotExistsError()
+    {
         unlink($this->filename);
+        $this->table->getHeaders();
+    }
+
+    /**
+     * @expectedException \Minity\DBase\Exception\TableOpenException
+     * @expectedExceptionMessage unable to open database
+     */
+    public function testOpenInvalidDatabaseError()
+    {
+        file_put_contents($this->filename, str_repeat('123_', 10) . PHP_EOL);
+        $this->table->getHeaders();
     }
 
     public function testGetRecord()
