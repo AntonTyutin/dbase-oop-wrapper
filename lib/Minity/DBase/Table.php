@@ -45,7 +45,7 @@ class Table
         if (!file_exists($this->dbFilename)) {
             throw new Exception\TableOpenException($this->dbFilename, 'File not found');
         }
-        $dbh = dbase_open($this->dbFilename, $this->mode);
+        $dbh = @dbase_open($this->dbFilename, $this->mode);
         if (false === $dbh) {
             $reason = error_get_last();
             throw new Exception\TableOpenException($this->dbFilename, $reason['message']);
