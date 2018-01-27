@@ -31,7 +31,7 @@ class RowsIterator implements \Iterator
     public function __construct(Table $db)
     {
         $this->db = $db;
-        $this->last = $db->getRecordsCount() - 1;
+        $this->last = $db->getRecordsCount();
     }
 
     public function current()
